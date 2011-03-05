@@ -1,6 +1,6 @@
 /* pgmp -- Module installation SQL script
  *
- * Copyright (C) 2011 Daniele Varrazzo
+ * Copyright (C) 2011 Daniele Varrazzo, Gianni Ciolli
  *
  * This file is part of the PostgreSQL GMP Module
  *
@@ -123,6 +123,18 @@ CREATE OPERATOR + (
 	RIGHTARG = mpz,
 	COMMUTATOR = +,
 	PROCEDURE = pmpz_add
+);
+
+CREATE OR REPLACE FUNCTION pmpz_mul(mpz, mpz)
+RETURNS mpz
+AS 'MODULE_PATHNAME'
+LANGUAGE C STRICT IMMUTABLE;
+
+CREATE OPERATOR * (
+	LEFTARG = mpz,
+	RIGHTARG = mpz,
+	COMMUTATOR = *,
+	PROCEDURE = pmpz_mul
 );
 
 

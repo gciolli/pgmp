@@ -1,6 +1,6 @@
 /* pmpz_io -- mpz Input/Output functions
  *
- * Copyright (C) 2011 Daniele Varrazzo
+ * Copyright (C) 2011 Daniele Varrazzo, Gianni Ciolli
  *
  * This file is part of the PostgreSQL GMP Module
  *
