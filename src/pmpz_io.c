@@ -108,7 +108,7 @@ pmpz_from_bigint(PG_FUNCTION_ARGS)
 {
     /* TODO: this function doesn't work - see regression tests. */
     int64 in = PG_GETARG_INT64(0);
-    elog(INFO, "%ld", in);
+    elog(INFO, "%ld", (long int)in);
     return _pmpz_from_long(in);
 }
 

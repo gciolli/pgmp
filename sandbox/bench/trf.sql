@@ -51,25 +51,35 @@
 
 \timing
 
-\echo -- with NUMERIC
+\echo -- (1a) with mpz, aggregating from a table
 \echo
 
-WITH RECURSIVE x(n,fact) AS (
-	SELECT :my_number, 1::numeric
-UNION ALL
-	SELECT n - 1, n::numeric * fact
-	FROM x
-	WHERE n > 1
-)
-SELECT length(fact::text) FROM x WHERE n = 1;
+CREATE TEMPORARY TABLE test_mpz_prod AS
+SELECT generate_series(1,:my_number)::mpz AS n;
 
-\echo -- with mpz
+SELECT length(sum(n)::text) FROM test_mpz_prod;
+
+SELECT length(prod(n)::text) FROM test_mpz_prod;
+
+\echo -- (2a) with mpz, single recursive query
 \echo
 
 WITH RECURSIVE x(n,fact) AS (
 	SELECT :my_number, 1::mpz
 UNION ALL
 	SELECT n - 1, n::mpz * fact
+	FROM x
+	WHERE n > 1
+)
+SELECT length(fact::text) FROM x WHERE n = 1;
+
+\echo -- (2b) with NUMERIC, single recursive query
+\echo
+
+WITH RECURSIVE x(n,fact) AS (
+	SELECT :my_number, 1::numeric
+UNION ALL
+	SELECT n - 1, n::numeric * fact
 	FROM x
 	WHERE n > 1
 )

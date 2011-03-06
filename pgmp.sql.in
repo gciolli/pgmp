@@ -181,6 +181,25 @@ CREATE AGGREGATE sum (mpz)
 );
 
 
+CREATE OR REPLACE FUNCTION pmpz_prod_s(_mpza, mpz)
+RETURNS _mpza
+AS 'MODULE_PATHNAME'
+LANGUAGE C STRICT IMMUTABLE;
+
+CREATE OR REPLACE FUNCTION pmpz_prod_f(_mpza)
+RETURNS mpz
+AS 'MODULE_PATHNAME'
+LANGUAGE C STRICT IMMUTABLE;
+
+CREATE AGGREGATE prod (mpz)
+(
+      SFUNC = pmpz_prod_s
+    , STYPE = _mpza
+    , FINALFUNC = pmpz_prod_f
+    , INITCOND = ''
+);
+
+
 --
 -- Test functions
 --
@@ -194,5 +213,3 @@ CREATE OR REPLACE FUNCTION numeric_test_dataset(int4, numeric)
 RETURNS SETOF numeric
 AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
-
-

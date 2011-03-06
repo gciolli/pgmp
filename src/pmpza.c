@@ -31,11 +31,17 @@ PG_FUNCTION_INFO_V1(pmpza_out);
 PG_FUNCTION_INFO_V1(pmpz_sum_s);
 PG_FUNCTION_INFO_V1(pmpz_sum_f);
 
+PG_FUNCTION_INFO_V1(pmpz_prod_s);
+PG_FUNCTION_INFO_V1(pmpz_prod_f);
+
 Datum       pmpza_in(PG_FUNCTION_ARGS);
 Datum       pmpza_out(PG_FUNCTION_ARGS);
 
 Datum       pmpz_sum_s(PG_FUNCTION_ARGS);
 Datum       pmpz_sum_f(PG_FUNCTION_ARGS);
+
+Datum       pmpz_prod_s(PG_FUNCTION_ARGS);
+Datum       pmpz_prod_f(PG_FUNCTION_ARGS);
 
 /*
  * Input/Output functions
@@ -140,5 +146,57 @@ pmpz_sum_f(PG_FUNCTION_ARGS)
     }
 }
 
+Datum
+pmpz_prod_s(PG_FUNCTION_ARGS)
+{
+    mpz_t           *a;
+    const mpz_t     z;
 
+    elog(DEBUG5, "CP1");
+    /* TODO: make compatible with PG < 9 */
+    if (UNLIKELY(!AggCheckCallContext(fcinfo, NULL)))
+    {
+        ereport(ERROR,
+            (errcode(ERRCODE_INVALID_TEXT_REPRESENTATION),
+            errmsg("pmpz_prod_s can only be called in accumulation")));
 
+        PG_RETURN_NULL();       /* unused, to avoid a warning */
+    }
+
+    elog(DEBUG5, "CP2");
+    a = (mpz_t *)PG_GETARG_POINTER(0);
+    elog(DEBUG5, "CP3");
+    mpz_from_pmpz(z, PG_GETARG_PMPZ(1));
+    elog(DEBUG5, "CP4");
+
+    if (LIKELY(LIMBS(*a))) {
+        elog(DEBUG5, "CP5a1");
+        mpz_mul(*a, *a, z);
+        elog(DEBUG5, "CP5a2");
+    }
+    else {                      /* uninitialized */
+        elog(DEBUG5, "CP5b1");
+        mpz_init_set(*a, z);
+        elog(DEBUG5, "CP5b2");
+    }
+
+    elog(DEBUG5, "CP6");
+    PG_RETURN_POINTER(a);
+}
+
+Datum
+pmpz_prod_f(PG_FUNCTION_ARGS)
+{
+    mpz_t       *a;
+    pmpz        *res;
+
+    a = (mpz_t *)PG_GETARG_POINTER(0);
+
+    if (LIKELY(LIMBS(*a))) {
+        res = pmpz_from_mpz(*a);
+        PG_RETURN_POINTER(res);
+    }
+    else {                      /* uninitialized */
+        PG_RETURN_NULL();
+    }
+}
